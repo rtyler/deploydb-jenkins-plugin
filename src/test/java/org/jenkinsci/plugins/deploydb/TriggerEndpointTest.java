@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.deploydb;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import hudson.Util;
 import hudson.model.FreeStyleProject;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
@@ -95,6 +96,10 @@ public class TriggerEndpointTest {
 
         // Then a build of that job should have been scheduled
         assertJobsTriggered(response, jobA);
+
+        // And DeployDB should be attributed as the cause
+        Queue.Item build = jenkins.getInstance().getQueue().getItem(jobA);
+        assertEquals(1, Util.filter(build.getCauses(), DeployDbCause.class).size());
     }
 
     @Test public void hookShouldTriggerMultipleMatchingJobs() throws Exception {

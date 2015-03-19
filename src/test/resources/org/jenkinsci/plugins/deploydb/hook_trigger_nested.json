@@ -1,0 +1,14 @@
+{
+  "id" : 1,
+  "service" : "faas",
+  "fooBar" : {
+    "id" : 2,
+    "child" : {
+      "nestedItem" : {
+         "parentId" : 2,
+         "nested" : "very",
+         "leaf" : true
+       }
+    }
+  }
+}

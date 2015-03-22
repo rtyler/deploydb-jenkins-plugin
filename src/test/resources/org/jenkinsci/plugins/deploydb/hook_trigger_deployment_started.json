@@ -6,10 +6,10 @@
     "name" : "cucumber-artifact",
     "version" : "1.0.1",
     "sourceUrl" : "http://example.com/maven/com.example.cucumber/cucumber-artifact/1.0.1/cucumber-artifact-1.0.1.jar",
-    "createdAt" : "{{created_timestamp}}"
+    "createdAt" : "2015-03-14T09:26:53+00:00"
   },
   "status" : "STARTED",
   "service" : "faas",
   "environment" : "pre-prod",
-  "createdAt" : "{{created_timestamp}}"
+  "createdAt" : "2015-03-14T09:26:53+00:00"
 }

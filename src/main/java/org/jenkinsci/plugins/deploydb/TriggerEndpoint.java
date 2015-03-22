@@ -52,8 +52,7 @@ public class TriggerEndpoint implements UnprotectedRootAction {
 
         // Schedule a build for each of the jobs that matched
         for (AbstractProject<?, ?> job : jobs) {
-            // TODO: Build action
-            job.scheduleBuild2(0, new DeployDbCause());
+            job.scheduleBuild2(0, new DeployDbCause(), new DeployDbBuildAction(hook));
         }
 
         // Respond with success in all cases

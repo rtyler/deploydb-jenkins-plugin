@@ -1,0 +1,13 @@
+language: java
+jdk:
+  - oraclejdk8
+cache:
+  directories:
+    - $HOME/.gradle
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/ad76bd3a7bd257f0159c
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false

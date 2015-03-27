@@ -8,7 +8,7 @@ import java.util.Map;
 /** Represents a webhook sent from DeployDB in order to trigger Jenkins builds. */
 public class TriggerWebhook {
 
-    // TODO: Type of hook
+    private EventType eventType;
     private long id;
     private String service;
     private Map<String, Object> map;
@@ -25,6 +25,21 @@ public class TriggerWebhook {
         return service;
     }
 
+    public EventType getEventType() {
+        return eventType;
+    }
+
+    /**
+     * Sets the event type for this hook, based on the given MIME type.
+     *
+     * @param mimeType MIME type for this hook.
+     * @return {@code true} iff the given value could be mapped to a known {@link EventType}.
+     */
+    public boolean setType(String mimeType) {
+        eventType = EventType.forMimeType(mimeType);
+        return eventType != null;
+    }
+
     /** Allows Jackson to set hook key/values we're not explicitly interested in. */
     @JsonAnySetter
     public void setOtherValue(String name, Object value) {
@@ -38,7 +53,7 @@ public class TriggerWebhook {
 
     @Override
     public String toString() {
-        return String.format("Webhook{id=%s, service=%s, values=%s}", id, service, map);
+        return String.format("Webhook{type=%s, id=%s, service=%s}", eventType, id, service);
     }
 
 }

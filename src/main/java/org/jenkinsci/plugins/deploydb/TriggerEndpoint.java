@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static hudson.Util.fixEmptyAndTrim;
+
 /** Unauthenticated HTTP endpoint for incoming webhooks from DeployDB. */
 @Extension
 public class TriggerEndpoint implements UnprotectedRootAction {
@@ -43,12 +45,27 @@ public class TriggerEndpoint implements UnprotectedRootAction {
             LOGGER.warning("Received hook without JSON body.");
             return HttpResponses.errorWithoutStack(400, "This endpoint expects a POST request with JSON body.");
         } catch (IOException e) {
-            LOGGER.warning("Failed to read webhook payload: "+ e.getMessage());
-            return HttpResponses.error(400, "Failed to read webhook payload.");
+            LOGGER.warning("Failed to read webhook payload from request body: "+ e.getMessage());
+            return HttpResponses.errorWithoutStack(400, "Failed to read webhook payload from request body.");
+        }
+
+        // The Content-Type header should contain info about what type of webhook this is
+        String contentType = fixEmptyAndTrim(req.getHeader("Content-Type"));
+        if (contentType == null) {
+            LOGGER.warning("Received hook without Content-Type header.");
+            return HttpResponses.errorWithoutStack(415, "Could not determine hook type from Content-Type header.");
+        }
+
+        // Try to parse the content type to a type
+        if (!hook.setType(contentType)) {
+            LOGGER.warning(String.format("Received hook with unrecognised Content-Type value: '%s'.", contentType));
+            return HttpResponses.errorWithoutStack(415,
+                    String.format("Could not determine hook type for '%s'.", contentType));
         }
 
         // Search for enabled jobs that should be triggered for the given hook
         List<AbstractProject<?, ?>> jobs = findJobsToTriggerForWebhook(hook);
+        LOGGER.fine(String.format("Incoming DeployDB %s triggered %d job(s).", hook, jobs.size()));
 
         // Schedule a build for each of the jobs that matched
         for (AbstractProject<?, ?> job : jobs) {

@@ -9,6 +9,7 @@ import hudson.model.Queue;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.deploydb.model.EventType;
 import org.jenkinsci.plugins.deploydb.model.TriggerWebhook;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,6 +22,7 @@ import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 import static java.net.HttpURLConnection.HTTP_BAD_METHOD;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_UNSUPPORTED_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -60,6 +62,14 @@ public class TriggerEndpointTest {
         } catch (FailingHttpStatusCodeException e) {
             assertEquals(HTTP_BAD_REQUEST, e.getStatusCode());
         }
+    }
+
+    @Test public void hookWithMissingMimeTypeIsRejected() throws IOException {
+        assertWebhookRequestWithBadMimeTypeIsRejected(null);
+    }
+
+    @Test public void hookWithBadMimeTypeIsRejected() throws IOException {
+        assertWebhookRequestWithBadMimeTypeIsRejected("application/json");
     }
 
     @Test public void unmatchedHookShouldTriggerNoBuilds() throws IOException {
@@ -132,6 +142,17 @@ public class TriggerEndpointTest {
         assertJobsTriggered(response, jobB, jobC);
     }
 
+    /** Sends a JSON webhook payload with the given Content-Type header value and asserts its rejection. */
+    private void assertWebhookRequestWithBadMimeTypeIsRejected(String mimeType) throws IOException {
+        try {
+            // When a valid JSON payload is posted, but with an unrecognised MIME type
+            submitWebhookRequest("hook_empty.json", mimeType);
+        } catch (FailingHttpStatusCodeException e) {
+            // Then the endpoint should reject the request
+            assertEquals(HTTP_UNSUPPORTED_TYPE, e.getStatusCode());
+        }
+    }
+
     /** Asserts that no builds have been enqueued. */
     private void assertNoJobsTriggered(WebResponse response) {
         assertJobsTriggered(response);
@@ -168,14 +189,22 @@ public class TriggerEndpointTest {
         return job;
     }
 
+    private WebResponse submitWebhookRequest(String filename) throws IOException {
+        return submitWebhookRequest(filename, EventType.DEPLOYMENT_CREATED.getMimeType());
+    }
+
     /**
      * Submits the contents of the given file as a webhook request to the {@link TriggerEndpoint}.
      *
      * @param filename Name of a file in the resources directory for this class.
+     * @param contentType The value of the Content-Type header to send with the webhook request, if not {@code null}.
      * @return The HTTP response to the webhook sent.
      */
-    private WebResponse submitWebhookRequest(String filename) throws IOException {
+    private WebResponse submitWebhookRequest(String filename, String contentType) throws IOException {
         WebRequestSettings req = new WebRequestSettings(webClient.createCrumbedUrl(ENDPOINT), POST);
+        if (contentType != null) {
+            req.setAdditionalHeader("Content-Type", contentType);
+        }
         req.setRequestBody(IOUtils.toString(getClass().getResourceAsStream(filename), Charsets.UTF_8));
         return webClient.getPage(req).getWebResponse();
     }

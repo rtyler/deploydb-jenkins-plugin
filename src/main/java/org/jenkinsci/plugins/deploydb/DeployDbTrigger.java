@@ -5,59 +5,59 @@ import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
-import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.deploydb.model.TriggerWebhook;
+import org.jenkinsci.plugins.deploydb.model.events.DeployDbTriggerEvent;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
 
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import static hudson.Util.fixEmptyAndTrim;
-import static hudson.Util.fixNull;
 
 /** Build trigger specifying criteria to match against incoming DeployDB webhooks. */
 public class DeployDbTrigger extends Trigger<AbstractProject<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(DeployDbTrigger.class.getName());
 
-    // TODO: Event type(s)
-
-    private String serviceNameRegex;
+    private List<DeployDbTriggerEvent> triggerEventTypes;
 
     @DataBoundConstructor
     public DeployDbTrigger() {}
 
-    public String getServiceNameRegex() {
-        return serviceNameRegex;
+    public List<DeployDbTriggerEvent> getTriggerEventTypes() {
+        return triggerEventTypes;
     }
 
     @DataBoundSetter
-    public void setServiceNameRegex(String regex) {
-        this.serviceNameRegex = regex;
+    public void setTriggerEventTypes(List<DeployDbTriggerEvent> triggerEventTypes) {
+        this.triggerEventTypes = triggerEventTypes;
     }
 
-    /** @return {@code true} if the given webhook should trigger the related excuse. */
-    public boolean accepts(TriggerWebhook hook) {
-        LOGGER.fine(String.format("Checking whether %s matches regex '%s'...", hook, serviceNameRegex));
-        String service = fixEmptyAndTrim(hook.getService());
-        return service != null && (service.equals(serviceNameRegex) || service.matches(serviceNameRegex));
+    /** @return {@code true} if the given webhook matches the criteria configured for this instance. */
+    public boolean accepts(AbstractProject<?, ?> job, TriggerWebhook hook) {
+        // Check whether we've been configured correctly
+        if (triggerEventTypes == null || triggerEventTypes.isEmpty()) {
+            LOGGER.info(String.format("Job '%s' cannot match any hooks, as no event triggers have been configured.",
+                    job.getDisplayName()));
+            return false;
+        }
+
+        // Check whether *any* of the configured event types match
+        for (DeployDbTriggerEvent e : triggerEventTypes) {
+            if (e.accepts(job, hook)) {
+                return true;
+            }
+        }
+
+        // Nothing matched
+        return false;
     }
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
-        public FormValidation doCheckServiceNameRegex(@QueryParameter String value) {
-            String regex = fixNull(value).trim();
-            try {
-                Pattern.compile(regex);
-                return FormValidation.ok();
-            } catch (PatternSyntaxException e) {
-                return FormValidation.errorWithMarkup(
-                        String.format("%s: <tt>%s</tt>", Messages.TriggerInvalidRegex(), e.getMessage()));
-            }
+        public List<DeployDbTriggerEvent.EventDescriptor> getEventDescriptors() {
+            return Jenkins.getInstance().getExtensionList(DeployDbTriggerEvent.EventDescriptor.class);
         }
 
         @Override

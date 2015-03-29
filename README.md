@@ -1,5 +1,7 @@
 # DeployDB Plugin for Jenkins
 
+[![Build Status](https://travis-ci.org/lookout/deploydb-jenkins-plugin.svg?branch=master)](https://travis-ci.org/lookout/deploydb-jenkins-plugin)
+
 Triggers builds based on incoming [DeployDB][] webhooks, and reports the results back to DeployDB.
 
 ## Webhook configuration

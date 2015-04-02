@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins.deploydb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.EnvVars;
 import org.jenkinsci.plugins.deploydb.model.TriggerWebhook;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.plugins.deploydb.Util.getWebhook;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -66,11 +64,6 @@ public class DeployDbBuildActionTest {
         assertThat(env.get("DDB_FOO_BAR_CHILD_NESTED_ITEM_PARENT_ID"), is("2"));
         assertThat(env.get("DDB_FOO_BAR_CHILD_NESTED_ITEM_NESTED"), is("very"));
         assertThat(env.get("DDB_FOO_BAR_CHILD_NESTED_ITEM_LEAF"), is("true"));
-    }
-
-    /** @return A request webhook object built from the contents of the given file. */
-    private TriggerWebhook getWebhook(String filename) throws IOException {
-        return new ObjectMapper().readValue(getClass().getResourceAsStream(filename), TriggerWebhook.class);
     }
 
 }

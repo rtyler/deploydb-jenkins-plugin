@@ -97,7 +97,7 @@ public class TriggerEndpoint implements UnprotectedRootAction {
                 }
 
                 // Check whether the given webhook satisfies the trigger's criteria
-                if (trigger.accepts(hook)) {
+                if (trigger.accepts(job, hook)) {
                     jobsToTrigger.add(job);
                 }
             }

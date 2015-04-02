@@ -4,6 +4,7 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import hudson.Util;
+import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
@@ -182,7 +183,7 @@ public class TriggerEndpointTest {
      */
     private FreeStyleProject configureDeployDbTriggeredJob(String name, boolean shouldMatchHooks) throws Exception {
         DeployDbTrigger trigger = mock(DeployDbTrigger.class);
-        when(trigger.accepts(any(TriggerWebhook.class))).thenReturn(shouldMatchHooks);
+        when(trigger.accepts(any(AbstractProject.class), any(TriggerWebhook.class))).thenReturn(shouldMatchHooks);
 
         FreeStyleProject job = jenkins.createFreeStyleProject(name);
         job.addTrigger(trigger);

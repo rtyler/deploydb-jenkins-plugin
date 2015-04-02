@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 buildscript {
     repositories {
         jcenter()
@@ -33,3 +35,19 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.10.19'
 }
 
+test {
+    // Log extra information for the benefit of the Travis CI build log
+    testLogging {
+        // Print more verbose stacktraces
+        exceptionFormat 'full'
+
+        // Plugin logging and stacktraces from Jenkins are printed to stderr
+        events 'passed', 'skipped', 'failed', 'standardError'
+
+        // Jenkins prints 100MB+ of incredibly verbose low-level logs to stdout;
+        // this is not useful, and causes Travis CI to fail as it only allows for 4MB of output
+        if (System.env['LOG_STDOUT'] != null) {
+            events << TestLogEvent.STANDARD_OUT
+        }
+    }
+}

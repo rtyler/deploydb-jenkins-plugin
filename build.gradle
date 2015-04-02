@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'org.jenkins-ci.jpi'
 
 group = 'org.jenkins-ci.plugins'
-version = '1.0-SNAPSHOT'
+version = '0.1'
 description = 'Triggers builds based on incoming DeployDB webhooks, and reports the results back to DeployDB'
 
 jenkinsPlugin {
@@ -21,6 +21,7 @@ jenkinsPlugin {
     shortName = 'deploydb'
     displayName = 'DeployDB Plugin'
     url = 'https://wiki.jenkins-ci.org/display/JENKINS/DeployDB+Plugin'
+    gitHubUrl = 'https://github.com/lookout/deploydb-jenkins-plugin'
 }
 
 repositories {

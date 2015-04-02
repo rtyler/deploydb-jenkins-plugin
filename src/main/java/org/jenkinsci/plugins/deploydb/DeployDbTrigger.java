@@ -19,10 +19,20 @@ public class DeployDbTrigger extends Trigger<AbstractProject<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(DeployDbTrigger.class.getName());
 
+    private boolean silentMode;
     private List<DeployDbTriggerEvent> triggerEventTypes;
 
     @DataBoundConstructor
     public DeployDbTrigger() {}
+
+    public boolean isSilentMode() {
+        return silentMode;
+    }
+
+    @DataBoundSetter
+    public void setSilentMode(boolean silent) {
+        this.silentMode = silent;
+    }
 
     public List<DeployDbTriggerEvent> getTriggerEventTypes() {
         return triggerEventTypes;

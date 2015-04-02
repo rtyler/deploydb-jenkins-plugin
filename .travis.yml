@@ -5,6 +5,8 @@ jdk:
 cache:
   directories:
     - $HOME/.gradle
+script:
+    - ./gradlew check --stacktrace
 notifications:
   webhooks:
     urls:

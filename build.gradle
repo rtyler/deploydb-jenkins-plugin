@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.10.0'
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.10.1'
     }
 }
 
@@ -21,8 +21,15 @@ jenkinsPlugin {
     url = 'https://wiki.jenkins-ci.org/display/JENKINS/DeployDB+Plugin'
 }
 
+repositories {
+    maven {
+        url 'http://dl.bintray.com/lookout/systems'
+    }
+}
+
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.4.4'
+    compile 'com.github.lookout:whoas:0.2.0'
     testCompile 'org.mockito:mockito-core:1.10.19'
 }
 

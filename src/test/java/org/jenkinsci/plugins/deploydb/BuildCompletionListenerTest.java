@@ -89,6 +89,25 @@ public class BuildCompletionListenerTest {
         assertWebhookDeliveryAttempts(webhookQueue, 1);
     }
 
+    @Test public void deployDbTriggeredBuildWithSilentModeShouldNotSendReportWebhook() throws Exception {
+        // Given that the DeployDB plugin has been configured
+        final AbstractHookQueue webhookQueue = createWebhookQueue();
+        setUpBuildCompletionListener(webhookQueue);
+
+        // And there is a job configured with silent mode enabled
+        FreeStyleProject job = jenkins.createFreeStyleProject(JOB_NAME);
+        DeployDbTrigger trigger = new DeployDbTrigger();
+        trigger.setSilentMode(true);
+        job.addTrigger(trigger);
+
+        // When a build of that job is triggered by DeployDB
+        Future<FreeStyleBuild> build = job.scheduleBuild2(0, new Cause.UserIdCause(), createTriggerAction());
+        jenkins.assertBuildStatusSuccess(build);
+
+        // Then a webhook should not have been sent
+        assertWebhookDeliveryAttempts(webhookQueue, 0);
+    }
+
     @Test public void successfulDeployDbTriggeredBuildShouldReportSuccess() throws Exception {
         triggerBuildAndAssertReportWebhookValues(Result.SUCCESS, ReportWebhook.Status.SUCCESS);
     }

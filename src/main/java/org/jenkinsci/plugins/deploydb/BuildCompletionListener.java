@@ -83,7 +83,11 @@ public class BuildCompletionListener extends RunListener<AbstractBuild<?, ?>> {
             return;
         }
 
-        // TODO: Ignore builds configured with silent mode
+        // Ignore builds configured with silent mode
+        DeployDbTrigger trigger = build.getParent().getTrigger(DeployDbTrigger.class);
+        if (trigger != null && trigger.isSilentMode()) {
+            return;
+        }
 
         // Create and send a report webhook to DeployDB for this build
         long deploymentId = action.getHook().getId();

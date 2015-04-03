@@ -8,6 +8,9 @@ Triggers builds based on incoming [DeployDB][] webhooks, and reports the results
 Your DeployDB installation should be configured to send all webhook events to
     `$JENKINS_BASE_URL/deploydb/trigger`
 
+Jenkins should be configured with the base URL to your DeployDB instance,
+so that it knows where build results should be reported to: Manage Jenkins → Configure System → DeployDB.
+
 ## Development
 This plugin is built with the [Jenkins Gradle plugin][jpi-plugin].
 
